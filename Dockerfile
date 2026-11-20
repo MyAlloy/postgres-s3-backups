@@ -1,12 +1,10 @@
-FROM amazon/aws-cli:latest
-ARG POSTGRES_VERSION
+ARG ALPINE_VERSION
+FROM alpine:${ALPINE_VERSION}
 
-RUN yum update -y \
-    && yum install -y gzip
+# Without the guard, an empty version installs Alpine's default postgresql-client.
+ARG POSTGRES_VERSION
+RUN apk add --no-cache bash aws-cli "postgresql${POSTGRES_VERSION:?POSTGRES_VERSION must be set}-client"
 
 WORKDIR /scripts
-COPY install-pg-dump.sh .
-RUN "/scripts/install-pg-dump.sh"
-
 COPY backup.sh .
 ENTRYPOINT [ "/scripts/backup.sh" ]
